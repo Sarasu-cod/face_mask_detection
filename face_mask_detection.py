@@ -6,11 +6,9 @@ from tensorflow.keras.models import Model
 import numpy as np
 import cv2
 
-# Paths to your dataset folders
 TRAIN_DIR = r"C:\Users\Sara Susan Sunil\face_mask_detection\Train"
 VAL_DIR = r"C:\Users\Sara Susan Sunil\face_mask_detection\Validation"
 
-# Data Generators
 datagen = ImageDataGenerator(
     rescale=1./255,
     rotation_range=20,
@@ -36,11 +34,9 @@ val_data = datagen.flow_from_directory(
     class_mode='binary'
 )
 
-# Load MobileNetV2 base
 base_model = MobileNetV2(weights="imagenet", include_top=False, input_shape=(224, 224, 3))
-base_model.trainable = False  # Freeze base
+base_model.trainable = False  
 
-# Add custom layers
 x = base_model.output
 x = GlobalAveragePooling2D()(x)
 x = Dropout(0.5)(x)
@@ -50,20 +46,16 @@ model = Model(inputs=base_model.input, outputs=predictions)
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-# Train
 history = model.fit(
     train_data,
     epochs=5,
     validation_data=val_data
 )
 
-# Save the model in the new format
 model.save('mask_detector.keras')
 
-# Load Haar cascade for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Start webcam
 cap = cv2.VideoCapture(0)
 
 while True:
